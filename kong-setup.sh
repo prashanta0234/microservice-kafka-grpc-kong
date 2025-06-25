@@ -88,25 +88,25 @@ setup_kong() {
     print_status "Setting up Kong configuration..."
     
     # Wait for Kong to be ready
-    sleep 10
+    sleep 30
     
     # Create services
-    print_status "Creating services..."
+    print_status "Creating Kong services..."
     
-    # Service1 (User Service)
+    # Service1 (User Service) - using Docker service name
     curl -s -X POST http://localhost:8001/services \
         -d name=user-service \
-        -d url=http://host.docker.internal:3001
+        -d url=http://service1:3001
     
-    # Service2 (Product Service)
+    # Service2 (Product Service) - using Docker service name
     curl -s -X POST http://localhost:8001/services \
         -d name=product-service \
-        -d url=http://host.docker.internal:3000
+        -d url=http://service2:3000
     
-    print_success "Services created"
+    print_success "Kong services created"
     
     # Create routes
-    print_status "Creating routes..."
+    print_status "Creating Kong routes..."
     
     # User service routes
     curl -s -X POST http://localhost:8001/services/user-service/routes \
@@ -120,7 +120,7 @@ setup_kong() {
         -d paths[]=/products \
         -d strip_path=false
     
-    print_success "Routes created"
+    print_success "Kong routes created"
     
     # Enable CORS plugin
     print_status "Enabling CORS plugin..."

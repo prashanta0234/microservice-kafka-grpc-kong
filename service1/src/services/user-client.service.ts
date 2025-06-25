@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ClientGrpc, Client, Transport } from '@nestjs/microservices';
+import { ClientGrpc, ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { firstValueFrom } from 'rxjs';
 
@@ -24,19 +25,36 @@ interface ProductService {
 
 @Injectable()
 export class UserClientService implements OnModuleInit {
-  @Client({
-    transport: Transport.GRPC,
-    options: {
-      package: 'product',
-      protoPath: join(__dirname, '../src/proto/product.proto'),
-      url: '0.0.0.0:5001',
-    },
-  })
   private client: ClientGrpc;
-
   private productService: ProductService;
 
+  constructor(private configService: ConfigService) {}
+
   onModuleInit() {
+    const nodeEnv = this.configService.get<string>('NODE_ENV') || 'development';
+
+    // Determine the correct gRPC URL based on environment
+    const grpcUrl =
+      nodeEnv === 'production'
+        ? 'service2:5001' // Docker service name for production
+        : 'localhost:5001'; // Localhost for development
+
+    console.log(
+      `Initializing gRPC client in ${nodeEnv} mode connecting to ${grpcUrl}`,
+    );
+
+    // Create gRPC client using NestJS microservices factory
+    const { ClientProxyFactory } = require('@nestjs/microservices');
+
+    this.client = ClientProxyFactory.create({
+      transport: Transport.GRPC,
+      options: {
+        package: 'product',
+        protoPath: join(__dirname, '../src/proto/product.proto'),
+        url: grpcUrl,
+      },
+    });
+
     this.productService =
       this.client.getService<ProductService>('ProductService');
   }

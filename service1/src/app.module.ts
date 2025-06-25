@@ -4,9 +4,18 @@ import { AppService } from './app.service';
 import { UserController } from './controllers/user.controller';
 import { UserClientService } from './services/user-client.service';
 import { KafkaProducerService } from './services/kafka-producer.service';
-
+import { ConfigModule } from '@nestjs/config';
+import * as path from 'path';
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: path.resolve(
+        __dirname,
+        `../.env.${process.env.NODE_ENV || 'development'}`,
+      ), // Load appropriate .env file based on NODE_ENV
+      isGlobal: true, // Make the config globally available
+    }),
+  ],
   controllers: [AppController, UserController],
   providers: [AppService, UserClientService, KafkaProducerService],
 })

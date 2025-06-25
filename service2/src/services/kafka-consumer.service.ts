@@ -1,4 +1,5 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Kafka, Consumer } from 'kafkajs';
 import { AppService } from '../app.service';
 
@@ -7,12 +8,23 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
   private kafka: Kafka;
   private consumer: Consumer;
 
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private configService: ConfigService,
+  ) {}
 
   async onModuleInit() {
+    const kafkaBroker =
+      this.configService.get<string>('KAFKA_BROKER') || 'localhost:9092';
+    const nodeEnv = this.configService.get<string>('NODE_ENV') || 'development';
+
+    console.log(
+      `Initializing Kafka consumer in ${nodeEnv} mode with broker: ${kafkaBroker}`,
+    );
+
     this.kafka = new Kafka({
       clientId: 'product-service',
-      brokers: ['localhost:9092'],
+      brokers: [kafkaBroker],
     });
     this.consumer = this.kafka.consumer({ groupId: 'product-group' });
     await this.consumer.connect();

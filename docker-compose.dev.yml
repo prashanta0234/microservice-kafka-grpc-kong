@@ -1,57 +1,57 @@
 version: "3.8"
 
 services:
-  # Service1 - User Service
-  service1:
-    build:
-      context: ./service1
-      dockerfile: Dockerfile
-    container_name: service1
-    ports:
-      - "3001:3001"
-      - "5000:5000"
-    environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - KAFKA_BROKER=kafka:29092
-      - GRPC_HOST=0.0.0.0
-      - GRPC_PORT=5000
-    env_file:
-      - ./service1/.env.production
-    volumes:
-      - ./service1:/app
-      - /app/node_modules
-    networks:
-      - kafka-network
-    depends_on:
-      - kafka
-    restart: unless-stopped
+  # Service1 - User Service (Development)
+  # service1:
+  #   build:
+  #     context: ./service1
+  #     dockerfile: Dockerfile
+  #   container_name: service1-dev
+  #   ports:
+  #     - "3001:3001"
+  #     - "5000:5000"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - PORT=3001
+  #     - KAFKA_BROKER=localhost:9092
+  #     - GRPC_HOST=localhost
+  #     - GRPC_PORT=5000
+  #   env_file:
+  #     - ./service1/.env.development
+  #   volumes:
+  #     - ./service1:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - kafka-network
+  #   depends_on:
+  #     - kafka
+  #   restart: unless-stopped
 
-  # Service2 - Product Service
-  service2:
-    build:
-      context: ./service2
-      dockerfile: Dockerfile
-    container_name: service2
-    ports:
-      - "3000:3000"
-      - "5001:5001"
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - KAFKA_BROKER=kafka:29092
-      - GRPC_HOST=0.0.0.0
-      - GRPC_PORT=5001
-    env_file:
-      - ./service2/.env.production
-    volumes:
-      - ./service2:/app
-      - /app/node_modules
-    networks:
-      - kafka-network
-    depends_on:
-      - kafka
-    restart: unless-stopped
+  # # Service2 - Product Service (Development)
+  # service2:
+  #   build:
+  #     context: ./service2
+  #     dockerfile: Dockerfile
+  #   container_name: service2-dev
+  #   ports:
+  #     - "3000:3000"
+  #     - "5001:5001"
+  #   environment:
+  #     - NODE_ENV=development
+  #     - PORT=3000
+  #     - KAFKA_BROKER=localhost:9092
+  #     - GRPC_HOST=localhost
+  #     - GRPC_PORT=5001
+  #   env_file:
+  #     - ./service2/.env.development
+  #   volumes:
+  #     - ./service2:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - kafka-network
+  #   depends_on:
+  #     - kafka
+  #   restart: unless-stopped
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
@@ -162,8 +162,8 @@ services:
       KONG_ANONYMOUS_REPORTS: off
     depends_on:
       - kong-migration
-      - service1
-      - service2
+      # - service1
+      # - service2
     ports:
       - "8000:8000" # Proxy
       - "8001:8001" # Admin API
