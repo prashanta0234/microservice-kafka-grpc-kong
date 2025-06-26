@@ -50,6 +50,28 @@ services:
   #     - kafka
   #   restart: unless-stopped
 
+  logger-service:
+    build:
+      context: ./logger-service 
+      dockerfile: Dockerfile
+    container_name: logger-service-dev
+    ports:
+      - "2900:2900"
+    environment:
+      - NODE_ENV=development
+      - PORT=2900
+      - KAFKA_BROKER=localhost:9092
+    env_file:
+      - ./logger-service/.env.development
+    volumes:
+      - ./logger-service:/app
+      - /app/node_modules
+    networks:
+      - kafka-network
+    depends_on:
+      - kafka
+    restart: unless-stopped
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     hostname: zookeeper
@@ -191,6 +213,39 @@ services:
       - "8002:8002"
     networks:
       - kafka-network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ELASTIC_PASSWORD=prashanta0234
+      - xpack.security.enabled=true
+    ports:
+      - "9200:9200"  # HTTP port for Elasticsearch
+      - "9300:9300"  # Transport port for internal communication
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.9.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+    ports:
+      - "5601:5601"  # Port for Kibana UI
+    networks:
+      - elastic
+    depends_on:
+      - elasticsearch
 
 volumes:
   zookeeper-data:
