@@ -1,7 +1,5 @@
-version: "3.8"
 
 services:
-  # Service1 - User Service (Development)
   # service1:
   #   build:
   #     context: ./service1
@@ -27,7 +25,6 @@ services:
   #     - kafka
   #   restart: unless-stopped
 
-  # # Service2 - Product Service (Development)
   # service2:
   #   build:
   #     context: ./service2
@@ -109,7 +106,6 @@ services:
     networks:
       - kafka-network
 
-  # Kong Database (PostgreSQL)
   kong-database:
     image: postgres:13-alpine
     container_name: kong-database
@@ -124,7 +120,6 @@ services:
     networks:
       - kafka-network
 
-  # Kong Migration
   kong-migration:
     image: kong:3.4
     container_name: kong-migration
@@ -140,7 +135,6 @@ services:
     networks:
       - kafka-network
 
-  # Kong API Gateway
   kong:
     image: kong:3.4
     container_name: kong
@@ -162,8 +156,6 @@ services:
       KONG_ANONYMOUS_REPORTS: off
     depends_on:
       - kong-migration
-      # - service1
-      # - service2
     ports:
       - "8000:8000" # Proxy
       - "8001:8001" # Admin API
@@ -172,7 +164,6 @@ services:
     networks:
       - kafka-network
 
-  # Kong Manager (Optional - Web UI)
   kong-manager:
     image: kong:3.4
     container_name: kong-manager
@@ -197,7 +188,7 @@ services:
     depends_on:
       - kong-migration
     ports:
-      - "8002:8002" # Kong Manager UI
+      - "8002:8002"
     networks:
       - kafka-network
 
