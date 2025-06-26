@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Product } from './interfaces/product.interface';
+import { Logger } from './logger/logger.service';
 
 @Injectable()
 export class AppService {
+  constructor(private logger: Logger) {}
   private products: Product[] = [
     {
       id: '1',
@@ -99,7 +101,9 @@ export class AppService {
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedProducts = this.products.slice(startIndex, endIndex);
-
+    this.logger.error(
+      `Retrieved ${paginatedProducts.length} products from page ${page} with limit ${limit}`,
+    );
     return {
       products: paginatedProducts,
       total: this.products.length,

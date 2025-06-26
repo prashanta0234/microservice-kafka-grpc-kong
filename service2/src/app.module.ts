@@ -6,6 +6,8 @@ import { ProductController } from './controllers/product.controller';
 import { ProductClientService } from './services/product-client.service';
 import { KafkaConsumerService } from './services/kafka-consumer.service';
 import * as path from 'path';
+import { KafkaProducerService } from './services/kafka-producer.service';
+import { Logger } from './logger/logger.service';
 
 @Module({
   imports: [
@@ -18,6 +20,12 @@ import * as path from 'path';
     }),
   ],
   controllers: [AppController, ProductController],
-  providers: [AppService, ProductClientService, KafkaConsumerService],
+  providers: [
+    AppService,
+    ProductClientService,
+    KafkaConsumerService,
+    KafkaProducerService,
+    Logger,
+  ],
 })
 export class AppModule {}

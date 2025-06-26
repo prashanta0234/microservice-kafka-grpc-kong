@@ -1,26 +1,30 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ClientGrpc, ClientsModule, Transport } from '@nestjs/microservices';
+import {
+  ClientGrpc,
+  Transport,
+  ClientProxyFactory,
+} from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 
 interface ProductService {
-  getProductById(data: { id: string }): any;
+  getProductById(data: { id: string }): Observable<any>;
   createProduct(data: {
     name: string;
     description: string;
     price: number;
     stock: number;
-  }): any;
+  }): Observable<any>;
   updateProduct(data: {
     id: string;
     name?: string;
     description?: string;
     price?: number;
     stock?: number;
-  }): any;
-  deleteProduct(data: { id: string }): any;
-  getAllProducts(data: { page?: number; limit?: number }): any;
+  }): Observable<any>;
+  deleteProduct(data: { id: string }): Observable<any>;
+  getAllProducts(data: { page?: number; limit?: number }): Observable<any>;
 }
 
 @Injectable()
@@ -33,18 +37,12 @@ export class UserClientService implements OnModuleInit {
   onModuleInit() {
     const nodeEnv = this.configService.get<string>('NODE_ENV') || 'development';
 
-    // Determine the correct gRPC URL based on environment
     const grpcUrl =
-      nodeEnv === 'production'
-        ? 'service2:5001' // Docker service name for production
-        : 'localhost:5001'; // Localhost for development
+      nodeEnv === 'production' ? 'service2:5001' : 'localhost:5001';
 
     console.log(
       `Initializing gRPC client in ${nodeEnv} mode connecting to ${grpcUrl}`,
     );
-
-    // Create gRPC client using NestJS microservices factory
-    const { ClientProxyFactory } = require('@nestjs/microservices');
 
     this.client = ClientProxyFactory.create({
       transport: Transport.GRPC,
@@ -59,7 +57,7 @@ export class UserClientService implements OnModuleInit {
       this.client.getService<ProductService>('ProductService');
   }
 
-  async getProductById(id: string) {
+  async getProductById(id: string): Promise<any> {
     return await firstValueFrom(this.productService.getProductById({ id }));
   }
 
@@ -68,7 +66,7 @@ export class UserClientService implements OnModuleInit {
     description: string;
     price: number;
     stock: number;
-  }) {
+  }): Promise<any> {
     return await firstValueFrom(this.productService.createProduct(data));
   }
 
@@ -78,15 +76,15 @@ export class UserClientService implements OnModuleInit {
     description?: string;
     price?: number;
     stock?: number;
-  }) {
+  }): Promise<any> {
     return await firstValueFrom(this.productService.updateProduct(data));
   }
 
-  async deleteProduct(id: string) {
+  async deleteProduct(id: string): Promise<any> {
     return await firstValueFrom(this.productService.deleteProduct({ id }));
   }
 
-  async getAllProducts(page?: number, limit?: number) {
+  async getAllProducts(page?: number, limit?: number): Promise<any> {
     return await firstValueFrom(
       this.productService.getAllProducts({ page, limit }),
     );

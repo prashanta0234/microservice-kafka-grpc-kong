@@ -2,6 +2,10 @@ import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Kafka, Consumer } from 'kafkajs';
 import { AppService } from '../app.service';
+import {
+  UserCreatedEvent,
+  isUserCreatedEvent,
+} from '../types/kafka-events.types';
 
 @Injectable()
 export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
@@ -35,12 +39,34 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
     await this.consumer.run({
       eachMessage: async ({ message }) => {
         if (message.value) {
-          const event = JSON.parse(message.value.toString());
-          if (event.products && Array.isArray(event.products)) {
-            for (const product of event.products) {
-              const created = await this.appService.createProduct(product);
-              console.log('Product created from user event:', created);
+          try {
+            const rawEvent: unknown = JSON.parse(message.value.toString());
+
+            if (isUserCreatedEvent(rawEvent)) {
+              const event: UserCreatedEvent = rawEvent;
+
+              if (event.products && event.products.length > 0) {
+                console.log(
+                  `Processing ${event.products.length} products from user-created event`,
+                );
+
+                for (const product of event.products) {
+                  const created = await this.appService.createProduct(product);
+                  console.log('Product created from user event:', created);
+                }
+              } else {
+                console.log(
+                  'User-created event received but no products to process',
+                );
+              }
+            } else {
+              console.warn(
+                'Received invalid user-created event format:',
+                rawEvent,
+              );
             }
+          } catch (error) {
+            console.error('Error processing user-created event:', error);
           }
         }
       },

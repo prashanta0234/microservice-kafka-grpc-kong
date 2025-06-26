@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from './interfaces/user.interface';
 import { KafkaProducerService } from './services/kafka-producer.service';
+import { Logger } from './logger/logger.service';
 
 @Injectable()
 export class AppService {
@@ -21,7 +22,10 @@ export class AppService {
     },
   ];
 
-  constructor(private readonly kafkaProducer: KafkaProducerService) {}
+  constructor(
+    private readonly kafkaProducer: KafkaProducerService,
+    private logger: Logger,
+  ) {}
 
   getHello(): string {
     return 'Hello World!';
@@ -96,6 +100,10 @@ export class AppService {
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedUsers = this.users.slice(startIndex, endIndex);
+
+    this.logger.debug(
+      `Retrieved ${paginatedUsers.length} users from page ${page} with limit ${limit}`,
+    );
 
     return {
       users: paginatedUsers,

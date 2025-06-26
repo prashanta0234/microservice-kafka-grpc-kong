@@ -22,4 +22,7 @@ async function bootstrap() {
 
   console.log('Service1 is running on HTTP port 3001 and gRPC port 5000');
 }
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Failed to start the application:', error);
+  process.exit(1);
+});

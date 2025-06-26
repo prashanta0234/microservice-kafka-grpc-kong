@@ -19,7 +19,7 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
     );
 
     this.kafka = new Kafka({
-      clientId: 'user-service',
+      clientId: 'product-service',
       brokers: [kafkaBroker],
     });
 
@@ -30,30 +30,6 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleDestroy() {
     await this.producer.disconnect();
-  }
-
-  async sendUserCreatedEvent(productsData: {
-    products?: Array<{
-      name: string;
-      description: string;
-      price: number;
-      stock: number;
-    }>;
-  }) {
-    try {
-      await this.producer.send({
-        topic: 'user-created',
-        messages: [
-          {
-            key: 'products-data',
-            value: JSON.stringify(productsData),
-          },
-        ],
-      });
-    } catch (error) {
-      console.error('Error sending products data to Kafka:', error);
-      throw error;
-    }
   }
 
   async sendLoggerToKafka(message: string) {
