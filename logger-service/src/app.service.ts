@@ -19,10 +19,12 @@ export class AppService implements LoggerService {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
             winston.format.colorize(),
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-            winston.format.printf(({ level, message }) => {
-              const timestamp = new Date().toLocaleString();
-              return `${timestamp} ${level}: ${message}`;
-            }),
+            winston.format.printf(
+              ({ level, message }: { level: string; message: string }) => {
+                const timestamp = new Date().toLocaleString();
+                return `${timestamp} ${level}: ${message}`;
+              },
+            ),
           ),
         }),
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
